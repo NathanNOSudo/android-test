@@ -46,7 +46,8 @@ import org.junit.runners.model.RunnerBuilder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-// TODO(b/26110951) not supported yet (note this class is ignored in BUILD file as well)
+// TODO(b/26110951) not supported yet (note this class is ignored in BUILD.old.old.old.old file as
+// well)
 // @RunWith(Parameterized.class)
 public abstract class AndroidLogOnlyBuilderTest {
 
