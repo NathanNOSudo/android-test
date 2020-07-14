@@ -108,6 +108,11 @@ class InstrumentationActivityInvoker implements ActivityInvoker {
       "androidx.test.core.app.InstrumentationActivityInvoker.FINISH_EMPTY_ACTIVITIES";
 
   /**
+   * The time to wait before rechecking if the activity was destroyed.
+   */
+  private static final int ACTIVITY_LIFECYCLE_BACKOFF_DELAY = 150;
+
+  /**
    * BootstrapActivity starts a test target activity specified by the extras bundle with key {@link
    * #TARGET_ACTIVITY_INTENT_KEY} in the intent that starts this bootstrap activity. The target
    * activity is started by {@link Activity#startActivityForResult} when the bootstrap activity is
@@ -265,7 +270,15 @@ class InstrumentationActivityInvoker implements ActivityInvoker {
      */
     public ActivityResult getActivityResult() {
       try {
-        latch.await(ActivityLifecycleTimeout.getMillis(), TimeUnit.MILLISECONDS);
+        long start = System.currentTimeMillis();
+        long timeout = ActivityLifecycleTimeout.getMillis();
+        while (latch.getCount() >= 0) {
+          if ((System.currentTimeMillis() - start) < timeout) {
+            Thread.sleep(ACTIVITY_LIFECYCLE_BACKOFF_DELAY);
+          } else {
+            throw new InterruptedException("Timeout reached");
+          }
+        }
       } catch (InterruptedException e) {
         Log.i(TAG, "Waiting activity result was interrupted", e);
       }
